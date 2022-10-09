@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Blogdini</title><link>https://arfoll.github.io/posts/</link><description>Recent content in Posts on Blogdini</description><generator>Hugo -- gohugo.io</generator><language>en-uk</language><copyright>Copyright 2022 - Brendan Le Foll</copyright><lastBuildDate>Sun, 09 Oct 2022 07:32:43 +0200</lastBuildDate><atom:link href="https://arfoll.github.io/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>GL.iNet Gls-10 - a POE powered bluetooth gateway</title><link>https://arfoll.github.io/posts/gls10/</link><pubDate>Sun, 09 Oct 2022 07:32:43 +0200</pubDate><guid>https://arfoll.github.io/posts/gls10/</guid><description>The GL.iNet GL-S10 is a small IoT gateway based on an ESP32 which has the particularity of being POE powered. It&amp;rsquo;s apart from this rather unremarkable which makes it perfect for running ESPHome which is increasingly attractive due to the new bluetooth proxy feature in homeassistant. They&amp;rsquo;re also super hackable and this seems fully supported by the vendor which even gives relatively nice instructions.
+Aquiring such devices is pretty easy from the usual sources, I found mine on ebay for ~30eur each since I&amp;rsquo;m impatient and didn&amp;rsquo;t want to wait.</description><content>&lt;p>The &lt;a href="https://www.gl-inet.com/products/gl-s10/">GL.iNet GL-S10&lt;/a> is a small IoT gateway based on an ESP32 which has the particularity of being POE powered. It&amp;rsquo;s apart from this rather unremarkable which makes it perfect for running ESPHome which is increasingly attractive due to the new bluetooth proxy feature in homeassistant. They&amp;rsquo;re also super hackable and this seems fully supported by the vendor which even gives relatively nice &lt;a href="https://docs.gl-inet.com/en/3/setup/gl-s10/firmware_compilation_guide/">instructions&lt;/a>.&lt;/p>
+&lt;p>Aquiring such devices is pretty easy from the usual sources, I found mine on ebay for ~30eur each since I&amp;rsquo;m impatient and didn&amp;rsquo;t want to wait. There are much cheaper ways to use ESPHome but I didn&amp;rsquo;t look all that far.&lt;/p>
+&lt;h4 id="versions">Versions&lt;/h4>
+&lt;p>There are unfortunately two versions of this device with different ethernet PHYs. I&amp;rsquo;ve no idea which is better and usually there seems to be no way of knowing when buying. Luckily both versions seem supported, in the wild both 2.3 and 1.0 devices are found. Mine are 1.0 devices which I guess means they&amp;rsquo;re old stock.&lt;/p>
+&lt;h3 id="esphome-on-the-commandline">ESPHome on the commandline&lt;/h3>
+&lt;p>There are many guides for ESPHome but most seem to involve random webpages etc, with a bit of digging I found a much easier way to deal with my devices that I&amp;rsquo;m happy with&lt;/p>
+&lt;h4 id="preparation">Preparation&lt;/h4>
+&lt;p>First we&amp;rsquo;ll install esphome and then clone the bluetooth proxies repo we&amp;rsquo;ll use to store our gl-s10 configuration&lt;/p>
+&lt;pre tabindex="0">&lt;code>pip install --upgrade --user esphome
+git clone git@github.com:esphome/bluetooth-proxies.git
+cd bluetooth-proxies/
+&lt;/code>&lt;/pre>&lt;p>If you have a 1.0 device you should modify the proxy file like so:&lt;/p>
+&lt;pre tabindex="0">&lt;code>--- gl-s10.yaml 2022-10-08 17:14:23.440001644 +0200
++++ gl-s10_v1.0.yaml 2022-10-09 07:04:06.563349749 +0200
+@@ -19,22 +19,12 @@
+framework:
+type: arduino
+-# Configuration fo V2.3 hardware revision
+ethernet:
+- type: IP101
++ type: LAN8720
+mdc_pin: GPIO23
+mdio_pin: GPIO18
+clk_mode: GPIO17_OUT
+phy_addr: 1
+- power_pin: GPIO5
+-
+-# Comment the above and use this instead for V1.0 revision of the hardware
+-# ethernet:
+-# type: LAN8720
+-# mdc_pin: GPIO23
+-# mdio_pin: GPIO18
+-# clk_mode: GPIO17_OUT
+-# phy_addr: 1
+&lt;/code>&lt;/pre>&lt;p>Then you can compile esphome&lt;/p>
+&lt;pre tabindex="0">&lt;code>esphome compile gl-s10.yaml
+&lt;/code>&lt;/pre>&lt;h4 id="flashing">Flashing&lt;/h4>
+&lt;p>Opening the device is pretty easy, there is a small tab in the back which you can use with a 2.5mm flathead screwdriver to pry open. Once open, the unit is just slipped into the casing so just carefully remove it. The easiest way to deal with the device is to solder a small 3 pin header to the GPIO headers on the top left of the board circled in blue in this nice diagram. Once you&amp;rsquo;ve soldered the 3 pins, I used an &lt;a href="https://ftdichip.com/products/ttl-232r-3v3/">FTDI TTL-232R-3V3 cable&lt;/a> but any serial port will do, you only need GND, TX &amp;amp; RX.&lt;/p>
+&lt;p>&lt;img src="https://arfoll.github.io/img/gls10/gl-s10-pinout.jpg" alt="pinout">&lt;/p>
+&lt;p>&lt;strong>Warning&lt;/strong> you should only use POE or Micro USB, using both will damage the unit. In order to avoid any issues, I stuck a small label on the microUSB port.&lt;/p>
+&lt;p>Once you have everything hooked up just connect your power source (POE or microUSB) whilst pressing the GPIO mode button (~2s seems to do the trick). Then upload your newly compiled firmware, and reboot by unplugging your power source (note the reset button does not seem to work in the bootloader mode).&lt;/p>
+&lt;pre tabindex="0">&lt;code>esphome upload gl-s10.yaml --device /dev/ttyUSB0
+&lt;/code>&lt;/pre>&lt;h4 id="ota-flashing">OTA flashing&lt;/h4>
+&lt;p>After you have ESPHome installed on the device and it&amp;rsquo;s functional, you should not need to use the UART port anymore and can flash directly via IP like this:&lt;/p>
+&lt;pre tabindex="0">&lt;code>esphome upload gl-s10.yaml --device 192.168.xx.xx
+&lt;/code>&lt;/pre>&lt;h3 id="adding-to-homassistant">Adding to homassistant&lt;/h3>
+&lt;p>This part is super easy, the device should be automatically detected after a few seconds as long as the network allows this.&lt;/p></content></item><item><title>Controlling Velux blinds using the KIG 300</title><link>https://arfoll.github.io/posts/veluxkig300/</link><pubDate>Sun, 18 Sep 2022 23:08:11 +0200</pubDate><guid>https://arfoll.github.io/posts/veluxkig300/</guid><description>If you have some Velux blinds (SSL, MSL) or windows which use the velux ACTIVE branding you likely can hook them up to control them remotely. In order to do this you need to buy the velux gateway KIG300 which is often sold as a kit with some temp/humidity sensor which I didn&amp;rsquo;t get.
+The annoying thing with this setup is that it&amp;rsquo;s using the apple homekit integration as well as requiring a smartphone app for the initial setup, pairing this with a network that has no internet is also a little tricky, so this is by far not my favourite solution.</description><content>&lt;p>If you have some Velux blinds (SSL, MSL) or windows which use the velux ACTIVE branding you likely can hook them up to control them remotely. In order to do this you need to buy the velux gateway KIG300 which is often sold as a kit with some temp/humidity sensor which I didn&amp;rsquo;t get.&lt;/p>
+&lt;p>The annoying thing with this setup is that it&amp;rsquo;s using the apple homekit integration as well as requiring a smartphone app for the initial setup, pairing this with a network that has no internet is also a little tricky, so this is by far not my favourite solution. But there seemed to be not much information on these devices and how you can use them so I figured I would jot down my notes. I&amp;rsquo;m not too unhappy about it but for ~90eur I think it&amp;rsquo;s quite expensive for what it does.&lt;/p>
+&lt;h2 id="my-setup">My setup&lt;/h2>
+&lt;p>I have two Velux MSL blinds with KLI300 controllers. The gateway pairs with the controllers via the &lt;a href="https://play.google.com/store/apps/details?id=com.velux.active&amp;amp;hl=en&amp;amp;gl=UShttps://play.google.com/store/apps/details?id=com.velux.active&amp;amp;hl=en&amp;amp;gl=US">VELUX ACTIVE with NETATMO application&lt;/a>. Essentially you press a magic pair button on the remote and then add the blind to be controlled.&lt;/p>
+&lt;h2 id="home-assistant">Home assistant&lt;/h2>
+&lt;p>Home assistant can use the &lt;a href="https://www.home-assistant.io/integrations/homekit/">homekit integration&lt;/a> and will report multiple covers. Currently it seems the position indicator is not working but it works in the VELUX app so I assume if I kicked it a little more I could make it work.&lt;/p>
+&lt;h3 id="alternatives">Alternatives&lt;/h3>
+&lt;p>With a shelly UNI someone made a really nice way to remote control the controller, I leave the post &lt;a href="https://www.reddit.com/r/homeassistant/comments/pzhkia/hack_velux_kli3xx_to_use_blinds_without_gateway/">here&lt;/a>. I chose not to do this as the setup looked a little messy and would need quite some work to clean up but also there is then no way to get state/position information on the blind.&lt;/p>
+&lt;p>Also other Velux gateways like the older KLF200 are likely simpler and nicer to use but they are more expensive, ~150EUR at the time of writing.&lt;/p></content></item></channel></rss>
