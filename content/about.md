@@ -10,3 +10,5 @@ I'm a French/British guy located in southern Germany. I made this blog mostly fo
 ### Contact me
 
 My email address is brendan '@' fridu <dot> net
+
+I'm also on [linkedin](https://www.linkedin.com/in/brendan-le-foll-14840637/)
