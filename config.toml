@@ -1,5 +1,4 @@
 baseURL = 'https://arfoll.github.io/'
-languageCode = 'en-uk'
 paginate = 5
 theme = 'terminal'
 
@@ -64,23 +63,29 @@ theme = 'terminal'
 
 [languages]
   [languages.en]
+    disabled = false
+    languageCode = 'en-US'
+    languageDirection = 'ltr'
+    weight = 0
     languageName = "English"
     title = "Blogdini"
-    subtitle = "A simple, retro theme for Hugo"
-    owner = ""
-    keywords = ""
     copyright = "Copyright 2022-2024 - Brendan Le Foll"
-    menuMore = "Show more"
-    readMore = "Read more"
-    readOtherPosts = "Read other posts"
-    newerPosts = "Newer posts"
-    olderPosts = "Older posts"
-    missingContentMessage = "Page not found..."
-    missingBackButtonLabel = "Back to home page"
 
-    [languages.en.params.logo]
-      logoText = "Home"
-      logoHomeLink = "/"
+    [languages.en.params]
+      subtitle = "Random stuff, projects & hacks"
+      menuMore = "Show more"
+      readMore = "Read more"
+      readOtherPosts = "Read other posts"
+      newerPosts = "Newer posts"
+      olderPosts = "Older posts"
+      missingContentMessage = "Page not found..."
+      missingBackButtonLabel = "Back to home page"
+
+
+      
+      [languages.en.params.logo]
+        logoText = "Home"
+        logoHomeLink = "/"
 
     [languages.en.menu]
       [[languages.en.menu.main]]
