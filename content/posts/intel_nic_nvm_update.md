@@ -1,8 +1,8 @@
 +++
-title = "Intel NIC nvm update (X710, X550, i225, i210)"
+title = "Intel NIC nvm update (X710-DA2, i225-T1, i210-T1)"
 date = "2024-04-21T19:42:19+02:00"
 author = ""
-authorTwitter = "" #do not include @
+authorTwitter = ""
 cover = ""
 tags = ["network", "nic", "intel"]
 keywords = ["", ""]
@@ -11,16 +11,18 @@ showFullContent = false
 readingTime = false
 hideComments = false
 +++
-Modern Intel NICs have both an updatable bootloader and firmware (NVM) that can be updated. If your NIC is on a custom PCB and/or on a motherboard you may get NVM updates via BIOS and/or a special firmware package from the vendor but likely not. It's a bit unclear what the firmware updates do, the Intel changelogs are quite poor but using the 'retail' NVM firmware does seem to enable your NIC to have all the features rather than be stuck to a lockdowned susbset as is common with vendor cards (OEM) commonly found on ebay from lenovo/dell/hp servers... These are obviously interesting since the real retail Intel NICs are both hard to find and even then hard to tell if they are really Intel retail cards.
+Modern Intel NICs have both an updatable bootloader and firmware (NVM) that can be updated. If your NIC is on a custom PCB and/or on a motherboard you may get NVM updates via BIOS and/or a special firmware package from the vendor but likely not. It's a bit unclear what the firmware updates do, the Intel changelogs are quite poor but using the 'retail' NVM firmware does seem to enable your NIC to have all the features rather than be stuck to a lockdowned subset as is common with vendor cards (OEM) commonly found on ebay from lenovo/dell/hp servers... These are obviously interesting since the real retail Intel NICs are both hard to find and even then hard to tell if they are really Intel retail cards.
 
 All the cards I played with are from second hand sources and I've no idea if they are real, fake, etc... Note that bricking your NIC is probably not that unlikely with these steps so beware of these steps! I obviously make no guarrantees this works for you ;-)
 
 Cards I tried this on:
 - X710-DA2
-- I255-T1
-- I210-T1
+- i255-T1
+- i210-T1
 
-Intel NICs seem to use YottaMark or BradyID which you can use to verify if your card is genuine. I've no idea how this works accurately since it seems that cloning a device would be trivial... I believe cards with this mark are typically retail units but my X710-DA2 has a yottamark sticker which can't be validated due to YottaMark being down and it seems the card is not considered retail by Intel themselves since it's not on the retail update list - so I've no idea if these are even worth looking out for. I can't imagine the fake market for Intel NICs is that high but who knows!
+I suspect that any modern i2xx and/or > X520, X540, X550, X710 or X810 cards should work, just note that X520 & X540 seem to be deprecated so you'll need to grab older packages.
+
+Intel NICs seem to use [YottaMark or BradyID](https://www.intel.com/content/www/us/en/support/articles/000007074/ethernet-products/gigabit-ethernet-adapters-up-to-2-5gbe.html) which you can use to verify if your card is genuine. I've no idea how this works accurately since it seems that cloning a device would be trivial... I believe cards with this mark are typically retail units but my X710-DA2 has a yottamark sticker which can't be validated due to YottaMark being down and it seems the card is not considered retail by Intel themselves since it's not on the retail update list - so I've no idea if these are even worth looking out for. I can't imagine the fake market for Intel NICs is that high but who knows!
 
 ## How it works
 
