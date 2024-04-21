@@ -11,7 +11,7 @@ showFullContent = false
 readingTime = false
 hideComments = false
 +++
-Modern Intel NICs have both an updatable bootloader and firmware (NVM) that can be updated. If your NIC is on a custom PCB and/or on a motherboard you may get NVM updates via BIOS and/or a special firmware package from the vendor but likely not. It's a bit unclear what the firmware updates do, the Intel changelogs are quite poor but using the 'retail' NVM firmware does seem to enable your NIC to have all the features rather than be stuck to a lockdowned subset as is common with vendor cards (OEM) commonly found on ebay from lenovo/dell/hp servers... These are obviously interesting since the real retail Intel NICs are both hard to find and even then hard to tell if they are really Intel retail cards.
+Modern Intel NICs have both an updatable bootloader and firmware (NVM). Updating this can both unlock new features in OEM cards and fix various issues. If your NIC is on a motherboard or non Intel reference design you may get NVM updates via BIOS and/or a special firmware package from the vendor but likely not. This trick probably only works for cards that are based on or very close to the Intel reference design. However the market for these NICs does not seem huge so it is likely your card is. Note that this probably works for OCP cards on adapters too. Using the 'retail' NVM firmware does seem to enable your NIC to have all the features rather than be stuck to a lockdowned subset as is common with vendor cards (OEM) commonly found on ebay from lenovo/dell/hp servers... These are obviously interesting since the real retail Intel NICs are both hard to find and even then hard to tell if they are really Intel retail cards [^yottamark].
 
 All the cards I played with are from second hand sources and I've no idea if they are real, fake, etc... Note that bricking your NIC is probably not that unlikely with these steps so beware of these steps! I obviously make no guarrantees this works for you ;-)
 
@@ -20,13 +20,13 @@ Cards I tried this on:
 - i255-T1
 - i210-T1
 
-I suspect that any modern i2xx and/or > X520, X540, X550, X710 or X810 cards should work, just note that X520 & X540 seem to be deprecated so you'll need to grab older packages.
+Any modern i2xx and/or > X520, X540, X550, X710 or X810 cards should work, note that X520 & X540 seem to be deprecated so you'll need to grab older packages.
 
-Intel NICs seem to use [YottaMark or BradyID](https://www.intel.com/content/www/us/en/support/articles/000007074/ethernet-products/gigabit-ethernet-adapters-up-to-2-5gbe.html) which you can use to verify if your card is genuine. I've no idea how this works accurately since it seems that cloning a device would be trivial... I believe cards with this mark are typically retail units but my X710-DA2 has a yottamark sticker which can't be validated due to YottaMark being down and it seems the card is not considered retail by Intel themselves since it's not on the retail update list - so I've no idea if these are even worth looking out for. I can't imagine the fake market for Intel NICs is that high but who knows!
+[^yottamark]: Intel NICs seem to use [YottaMark or BradyID](https://www.intel.com/content/www/us/en/support/articles/000007074/ethernet-products/gigabit-ethernet-adapters-up-to-2-5gbe.html) which you can use to verify if your card is genuine. I've no idea how this works accurately since it seems that cloning a device would be trivial... I believe cards with this mark are typically retail units but my X710-DA2 has a yottamark sticker which can't be validated due to YottaMark being down and it seems the card is not considered retail by Intel themselves since it's not on the retail update list - so I've no idea if these are even worth looking out for. I can't imagine the fake market for Intel NICs is that high but who knows!
 
 ## How it works
 
-Intel cards have both a bootloader (except i210) and an NVM firmware. Intel release a big all in one package called a complete driver [package](https://www.intel.com/content/www/us/en/download/15084/intel-ethernet-adapter-complete-driver-pack.html). It's unclear why they bundle it this way but here we go. Download it, there might be a newer one too. Hilariously the release notes points to a powerpoint slide that links to a PDF... utter madness. Once you have settled and decided that obviously your problem is fixed by this new version let's get to it.
+Intel cards have both a bootloader and an NVM firmware. Intel release a big all in one package called a complete driver [package](https://www.intel.com/content/www/us/en/download/15084/intel-ethernet-adapter-complete-driver-pack.html). It's unclear why they bundle it this way but here we go. Download it, there might be a newer one too. Hilariously the release notes points to a powerpoint slide that links to a PDF... utter madness. Once you have settled and decided that obviously your problem is fixed by this new version let's get to it.
 
 ## OS choice
 
@@ -38,12 +38,20 @@ sudo apt install gcc-12 linux-headers-$(uname -r) make ethtool
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 10
 ```
 
+Note that because ubuntu 12.04 defaults to gcc11 but uses gcc12 to compile the kernel you need to do this to get the CC var used in the script to work.
+
+None of this is rocket science but Intel seems to insist you get a Premier support account to even give instructions on the process and refuses to help when it thinks a card may be form an OEM even though it's the identical hardware, though does seem to be willing to support ancient cards well out of warranty, truly odd customer support [^support].
+
+[^support]: See thread [here](https://community.intel.com/t5/Ethernet-Products/Intel-I225-T1-NVM-update/m-p/1531855)
+
 ## Updating the bootloader
+
+The bootloader update requires the custom kernel driver - hence you need to build & install it.
 
 Let's go check the bootloader state
 ```{.sh}
 cd /media/ubuntu/<mydisk>/Temp/Release_29.0.1/APPS/BootUtil/Linux_x64/DRIVER/
-./install
+sudo ./install
 cd ../
 cp ../BootImg.FLB .
 sudo ./bootutil64e
@@ -63,7 +71,7 @@ Port Network Address Location Series  WOL Flash Firmware                Version
 
 Here you can see that the first card is the only one that is 'valid' here. Flash it simply with:
 ```{.sh}
-./bootutil64e -NIC=1 -up=combo
+sudo ./bootutil64e -NIC=1 -up=combo
 ```
 
 Note that a dual port NIC seems to only need the first entry flashed, the 'combo' seems to be a type of firmware, I'm not entirely sure I understood the implications here. In all cases that seemed to work.
@@ -136,8 +144,13 @@ Num Description                          Ver.(hex)  DevId S:B    Status
 
 I thought this would be a retail item but seems it is not. Also these cards seem to have no bootloader, just an NVM.
 
+My card by default was not recognised but there are only two i210 cards
+supported, I decided to gamble that mine was probably a
+OEM_Beaver_Lake_2p00_G59947 due to it likely coming from a server pull and it
+seemed to work. I just added the ID to the REPLACES section of the cfg.
+
 ```{.sh}
-ubuntu@ubuntu:/media/ubuntu/CrucialP3/Temp/Release_29.0.1/NVMUpdatePackage/I210/I210/Linux_x64$ sudo ./nvmupdate64e 
+ubuntu@ubuntu:/media/ubuntu/<mydisk>/Temp/Release_29.0.1/NVMUpdatePackage/I210/I210/Linux_x64$ sudo ./nvmupdate64e 
 
 Intel(R) Ethernet NVM Update Tool
 NVMUpdate version 1.40.5.5
