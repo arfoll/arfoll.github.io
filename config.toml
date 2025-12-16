@@ -1,6 +1,8 @@
 baseURL = 'https://arfoll.github.io/'
-paginate = 5
 theme = 'terminal'
+
+[pagination]
+  pagerSize = 5
 
 [params]
   # dir name of your main content (default is `content/posts`).
