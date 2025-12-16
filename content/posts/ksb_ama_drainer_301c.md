@@ -1,5 +1,5 @@
 +++
-title: "Repairing KSB AMA Drainer 301C"
+title = "Repairing KSB AMA Drainer 301C"
 date = "2025-12-16T20:18:00+02:00"
 author = ""
 authorTwitter = ""
